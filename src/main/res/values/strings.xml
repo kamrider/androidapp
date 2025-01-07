@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">okok</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="app_name">健康监测</string>
+    <string name="title_home">主页</string>
+    <string name="title_health_data">健康数据</string>
+    <string name="title_history">历史记录</string>
+    <string name="title_settings">设置</string>
+    <string name="default_heart_rate">--</string>
+    <string name="default_blood_oxygen">--</string>
 </resources>
