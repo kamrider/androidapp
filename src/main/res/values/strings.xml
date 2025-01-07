@@ -6,4 +6,12 @@
     <string name="title_settings">设置</string>
     <string name="default_heart_rate">--</string>
     <string name="default_blood_oxygen">--</string>
+    <string name="connect_device">连接设备</string>
+    <string name="connecting">连接中...</string>
+    <string name="disconnect_device">断开连接</string>
+    <string name="connection_failed">连接失败</string>
+    <string name="connection_success">已连接</string>
+    <string name="no_devices_found">未发现设备</string>
+    <string name="scanning_devices">正在扫描设备...</string>
+    <string name="select_device">请选择要连接的设备</string>
 </resources>

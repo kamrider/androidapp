@@ -4,152 +4,212 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:fitsSystemWindows="true">
 
-    <!-- 顶部状态卡片 -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/status_card"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp">
 
-        <LinearLayout
+        <!-- 实时数据卡片 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/data_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
 
-            <TextView
-                android:id="@+id/status_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="设备状态"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <com.airbnb.lottie.LottieAnimationView
-                android:id="@+id/bluetooth_animation"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:layout_gravity="center"
-                app:lottie_autoPlay="true"
-                app:lottie_loop="true"
-                app:lottie_rawRes="@raw/bluetooth_scanning" />
-
-            <TextView
-                android:id="@+id/connection_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="8dp"
-                android:text="正在搜索设备..."
-                android:textColor="@color/status_text" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- 中间的实时数据卡片 -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/data_card"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="180dp"
-        android:layout_marginHorizontal="16dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="实时数据"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <GridLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:columnCount="2"
-                android:rowCount="2">
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <!-- 心率数据 -->
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:orientation="vertical"
-                    android:padding="8dp">
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
+                    android:text="实时数据"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:columnCount="2"
+                    android:rowCount="2">
+
+                    <!-- 心率数据 -->
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="心率"
-                        android:textSize="16sp" />
+                        android:layout_columnWeight="1"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+                        
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="心率"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/heart_rate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="75"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="BPM"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- 血氧数据 -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+                        
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="血氧"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/blood_oxygen"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="98"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="%"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </GridLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 设备状态卡片 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/status_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- 标题栏布局 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <TextView
-                        android:id="@+id/heart_rate"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/status_title"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="75"
-                        android:textSize="24sp"
+                        android:layout_weight="1"
+                        android:text="设备状态"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
-                    <TextView
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/refresh_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:padding="8dp"
+                        app:icon="@drawable/ic_refresh"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/connect_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="BPM"
-                        android:textSize="12sp" />
+                        android:layout_marginStart="8dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="8dp"
+                        android:text="连接设备"
+                        android:textSize="14sp"
+                        app:cornerRadius="20dp"
+                        style="@style/Widget.MaterialComponents.Button" />
                 </LinearLayout>
 
-                <!-- 血氧数据 -->
-                <LinearLayout
-                    android:layout_width="0dp"
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/bluetooth_animation"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_gravity="center"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/bluetooth_scanning" />
+
+                <!-- 设备列表 -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/device_list"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:orientation="vertical"
-                    android:padding="8dp">
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="血氧"
-                        android:textSize="16sp" />
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone" />
 
-                    <TextView
-                        android:id="@+id/blood_oxygen"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="98"
-                        android:textSize="24sp"
-                        android:textStyle="bold" />
+                <!-- 无设备时显示的提示 -->
+                <TextView
+                    android:id="@+id/no_devices_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/no_devices_found"
+                    android:textColor="@color/status_text"
+                    android:visibility="visible" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="%"
-                        android:textSize="12sp" />
-                </LinearLayout>
-            </GridLayout>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- 底部的开始监测按钮 -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/start_monitoring"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="bottom"
-        android:layout_margin="16dp"
-        android:text="开始监测"
-        android:textSize="18sp"
-        app:cornerRadius="30dp"
-        style="@style/Widget.MaterialComponents.Button" />
+        <!-- 底部的开始监测按钮 -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+            
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/start_monitoring"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginBottom="80dp"
+            android:layout_marginHorizontal="8dp"
+            android:text="开始监测"
+            android:textSize="18sp"
+            app:cornerRadius="30dp"
+            style="@style/Widget.MaterialComponents.Button" />
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
