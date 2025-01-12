@@ -35,6 +35,7 @@ class HomeFragment : Fragment() {
     private lateinit var refreshButton: MaterialButton
     private lateinit var bluetoothManager: BluetoothManager
     private var selectedDevice: BluetoothDevice? = null
+    private lateinit var disconnectButton: MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,6 +82,13 @@ class HomeFragment : Fragment() {
             startBluetoothScan()
         }
         
+        disconnectButton = binding.disconnectButton
+        
+        // 添加断开连接按钮点击事件
+        disconnectButton.setOnClickListener {
+            bluetoothManager.disconnect()
+        }
+        
         setupBluetoothObservers()
         
         return binding.root
@@ -99,6 +107,18 @@ class HomeFragment : Fragment() {
         bluetoothManager.discoveredDevices.observe(viewLifecycleOwner) { devices ->
             (deviceListRecyclerView.adapter as? DeviceListAdapter)?.updateDevices(devices)
             updateDeviceListVisibility(devices.isEmpty())
+        }
+
+        bluetoothManager.isConnected.observe(viewLifecycleOwner) { isConnected ->
+            if (isConnected) {
+                Toast.makeText(context, "设备连接成功", Toast.LENGTH_SHORT).show()
+                disconnectButton.visibility = View.VISIBLE
+                refreshButton.visibility = View.GONE
+            } else {
+                Toast.makeText(context, "设备已断开连接", Toast.LENGTH_SHORT).show()
+                disconnectButton.visibility = View.GONE
+                refreshButton.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -172,7 +192,7 @@ class HomeFragment : Fragment() {
             .setTitle("连接设备")
             .setMessage("是否连接到设备：${device.name ?: "未知设备"}?")
             .setPositiveButton("连接") { _, _ ->
-                // TODO: 实现连接逻辑
+                bluetoothManager.connect(device)
             }
             .setNegativeButton("取消", null)
             .show()

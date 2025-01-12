@@ -152,6 +152,21 @@
                             android:textSize="14sp"
                             app:cornerRadius="20dp"
                             style="@style/Widget.MaterialComponents.Button" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/disconnect_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="8dp"
+                            android:text="断开连接"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            app:cornerRadius="20dp"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
                     </LinearLayout>
 
                     <!-- 设备列表容器 -->

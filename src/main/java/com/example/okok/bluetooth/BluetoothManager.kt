@@ -14,6 +14,7 @@ class BluetoothManager(private val context: Context) {
     private val bluetoothAdapter = bluetoothManager.adapter
     private var bluetoothLeScanner: BluetoothLeScanner? = null
     private var scanning = false
+    private var bluetoothGatt: BluetoothGatt? = null
     
     // LiveData 用于观察状态变化
     private val _isScanning = MutableLiveData<Boolean>()
@@ -21,6 +22,9 @@ class BluetoothManager(private val context: Context) {
     
     private val _discoveredDevices = MutableLiveData<MutableList<BluetoothDevice>>()
     val discoveredDevices: LiveData<MutableList<BluetoothDevice>> = _discoveredDevices
+
+    private val _isConnected = MutableLiveData<Boolean>()
+    val isConnected: LiveData<Boolean> = _isConnected
 
     companion object {
         private const val SCAN_PERIOD = 10000L // 扫描持续时间：10秒
@@ -75,6 +79,46 @@ class BluetoothManager(private val context: Context) {
                 scanning = false
                 _isScanning.value = false
             }
+        }
+    }
+
+    // GATT 回调
+    private val gattCallback = object : BluetoothGattCallback() {
+        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
+            when (newState) {
+                BluetoothProfile.STATE_CONNECTED -> {
+                    _isConnected.postValue(true)
+                    bluetoothGatt?.discoverServices()
+                }
+                BluetoothProfile.STATE_DISCONNECTED -> {
+                    _isConnected.postValue(false)
+                    bluetoothGatt?.close()
+                }
+            }
+        }
+
+        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                // TODO: 处理服务发现成功
+            }
+        }
+    }
+
+    // 连接设备
+    fun connect(device: BluetoothDevice) {
+        try {
+            bluetoothGatt = device.connectGatt(context, false, gattCallback)
+        } catch (e: SecurityException) {
+            _isConnected.postValue(false)
+        }
+    }
+
+    // 断开连接
+    fun disconnect() {
+        try {
+            bluetoothGatt?.disconnect()
+        } catch (e: SecurityException) {
+            // 处理权限异常
         }
     }
 }
