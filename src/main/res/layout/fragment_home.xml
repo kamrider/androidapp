@@ -107,91 +107,87 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/status_card"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:layout_marginTop="16dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_height="match_parent">
 
-                <!-- 标题栏布局 -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <TextView
-                        android:id="@+id/status_title"
-                        android:layout_width="0dp"
+                    <!-- 标题栏布局 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/status_title"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="设备状态"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/refresh_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="8dp"
+                            android:text="刷新"
+                            android:textSize="14sp"
+                            app:cornerRadius="20dp"
+                            style="@style/Widget.MaterialComponents.Button" />
+                    </LinearLayout>
+
+                    <!-- 设备列表容器 -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:text="设备状态"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:layout_marginTop="16dp">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/refresh_button"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:insetLeft="0dp"
-                        android:insetTop="0dp"
-                        android:insetRight="0dp"
-                        android:insetBottom="0dp"
-                        android:padding="8dp"
-                        app:icon="@drawable/ic_refresh"
-                        app:iconGravity="textStart"
-                        app:iconPadding="0dp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/device_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:clipToPadding="false"
+                            android:visibility="gone" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/connect_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="8dp"
-                        android:text="连接设备"
-                        android:textSize="14sp"
-                        app:cornerRadius="20dp"
-                        style="@style/Widget.MaterialComponents.Button" />
+                        <com.airbnb.lottie.LottieAnimationView
+                            android:id="@+id/bluetooth_animation"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_gravity="center"
+                            app:lottie_autoPlay="true"
+                            app:lottie_loop="true"
+                            app:lottie_rawRes="@raw/bluetooth_scanning" />
+
+                        <TextView
+                            android:id="@+id/no_devices_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@string/no_devices_found"
+                            android:textColor="@color/status_text"
+                            android:visibility="visible" />
+                    </FrameLayout>
                 </LinearLayout>
-
-                <com.airbnb.lottie.LottieAnimationView
-                    android:id="@+id/bluetooth_animation"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:layout_gravity="center"
-                    app:lottie_autoPlay="true"
-                    app:lottie_loop="true"
-                    app:lottie_rawRes="@raw/bluetooth_scanning" />
-
-                <!-- 设备列表 -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/device_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="16dp"
-                    android:visibility="gone" />
-
-                <!-- 无设备时显示的提示 -->
-                <TextView
-                    android:id="@+id/no_devices_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/no_devices_found"
-                    android:textColor="@color/status_text"
-                    android:visibility="visible" />
-            </LinearLayout>
+            </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- 底部的开始监测按钮 -->
@@ -199,17 +195,6 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
-            
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/start_monitoring"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginBottom="80dp"
-            android:layout_marginHorizontal="8dp"
-            android:text="开始监测"
-            android:textSize="18sp"
-            app:cornerRadius="30dp"
-            style="@style/Widget.MaterialComponents.Button" />
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -12,11 +12,15 @@ import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.button.MaterialButton
 import com.example.okok.databinding.FragmentHomeBinding
 import com.example.okok.R
-import android.bluetooth.BluetoothDevice
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.view.animation.LinearInterpolator
+import com.example.okok.bluetooth.BluetoothManager
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import android.widget.Toast
+import android.Manifest
+import android.bluetooth.BluetoothDevice
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class HomeFragment : Fragment() {
 
@@ -26,12 +30,16 @@ class HomeFragment : Fragment() {
     private lateinit var connectionAnimation: LottieAnimationView
     private lateinit var heartRateTextView: TextView
     private lateinit var bloodOxygenTextView: TextView
-    private lateinit var startMonitoringButton: MaterialButton
-    private lateinit var connectButton: MaterialButton
     private lateinit var deviceListRecyclerView: RecyclerView
     private lateinit var noDevicesText: TextView
-    private var selectedDevice: BluetoothDevice? = null
     private lateinit var refreshButton: MaterialButton
+    private lateinit var bluetoothManager: BluetoothManager
+    private var selectedDevice: BluetoothDevice? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        bluetoothManager = BluetoothManager(requireContext())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,12 +48,10 @@ class HomeFragment : Fragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         
-        // 初始化视图引用，使用正确的ID
+        // 初始化视图引用
         connectionAnimation = binding.bluetoothAnimation
         heartRateTextView = binding.heartRate
         bloodOxygenTextView = binding.bloodOxygen
-        startMonitoringButton = binding.startMonitoring
-        connectButton = binding.connectButton
         
         // 设置动画
         connectionAnimation.setAnimation(R.raw.bluetooth_scanning)
@@ -61,53 +67,119 @@ class HomeFragment : Fragment() {
         // 设置RecyclerView
         deviceListRecyclerView.layoutManager = LinearLayoutManager(context)
         val deviceListAdapter = DeviceListAdapter(emptyList()) { device ->
+            // 处理设备选择
             selectedDevice = device
-            connectButton.isEnabled = true
+            // TODO: 显示连接按钮或直接开始连接
+            showConnectDialog(device)
         }
         deviceListRecyclerView.adapter = deviceListAdapter
-        
-        // 修改连接按钮点击事件
-        connectButton.isEnabled = false // 初始状态禁用
-        connectButton.setOnClickListener {
-            selectedDevice?.let { device ->
-                connectButton.isEnabled = false
-                connectButton.text = getString(R.string.connecting)
-                // TODO: 实现与选中设备的连接逻辑
-            }
-        }
         
         refreshButton = binding.refreshButton
         
         // 添加刷新按钮点击事件
         refreshButton.setOnClickListener {
-            // 开始旋转动画
-            refreshButton.isEnabled = false
-            val rotation = ObjectAnimator.ofFloat(refreshButton, View.ROTATION, 0f, 360f)
-            rotation.duration = 1000
-            rotation.interpolator = LinearInterpolator()
-            rotation.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    refreshButton.isEnabled = true
-                    // 动画结束后，如果没有找到设备，显示"无设备"
-                    if (deviceListRecyclerView.adapter?.itemCount == 0) {
-                        noDevicesText.text = getString(R.string.no_devices_found)
-                        noDevicesText.visibility = View.VISIBLE
-                    } else {
-                        noDevicesText.visibility = View.GONE
-                    }
-                }
-            })
-            rotation.start()
-            
-            // 显示搜索状态
-            deviceListRecyclerView.visibility = View.GONE
-            noDevicesText.visibility = View.VISIBLE
-            noDevicesText.text = getString(R.string.scanning_devices)
-            
-            // TODO: 实现蓝牙设备扫描逻辑
+            startBluetoothScan()
         }
         
+        setupBluetoothObservers()
+        
         return binding.root
+    }
+
+    private fun setupBluetoothObservers() {
+        bluetoothManager.isScanning.observe(viewLifecycleOwner) { scanning ->
+            if (scanning) {
+                connectionAnimation.playAnimation()
+            } else {
+                connectionAnimation.pauseAnimation()
+                refreshButton.isEnabled = true
+            }
+        }
+
+        bluetoothManager.discoveredDevices.observe(viewLifecycleOwner) { devices ->
+            (deviceListRecyclerView.adapter as? DeviceListAdapter)?.updateDevices(devices)
+            updateDeviceListVisibility(devices.isEmpty())
+        }
+    }
+
+    private fun startBluetoothScan() {
+        if (!checkAndRequestPermissions()) {
+            return
+        }
+        // 开始旋转动画
+        refreshButton.isEnabled = false
+        val rotation = ObjectAnimator.ofFloat(refreshButton, View.ROTATION, 0f, 360f)
+        rotation.duration = 1000
+        rotation.interpolator = LinearInterpolator()
+        rotation.start()
+        
+        // 更新UI状态
+        deviceListRecyclerView.visibility = View.GONE
+        noDevicesText.visibility = View.VISIBLE
+        noDevicesText.text = getString(R.string.scanning_devices)
+        
+        // 开始扫描
+        bluetoothManager.startScan()
+    }
+
+    private fun updateDeviceListVisibility(isEmpty: Boolean) {
+        if (isEmpty) {
+            noDevicesText.text = getString(R.string.no_devices_found)
+            noDevicesText.visibility = View.VISIBLE
+            deviceListRecyclerView.visibility = View.GONE
+        } else {
+            noDevicesText.visibility = View.GONE
+            deviceListRecyclerView.visibility = View.VISIBLE
+        }
+    }
+
+    private fun checkAndRequestPermissions(): Boolean {
+        val permissions = arrayOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+        
+        val permissionsToRequest = permissions.filter {
+            ActivityCompat.checkSelfPermission(requireContext(), it) != PackageManager.PERMISSION_GRANTED
+        }
+        
+        if (permissionsToRequest.isNotEmpty()) {
+            requestPermissions(permissionsToRequest.toTypedArray(), PERMISSION_REQUEST_CODE)
+            return false
+        }
+        return true
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                // 权限已授予，可以开始扫描
+                startBluetoothScan()
+            } else {
+                // 显示权限被拒绝的提示
+                Toast.makeText(context, "需要蓝牙和位置权限才能扫描设备", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun showConnectDialog(device: BluetoothDevice) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("连接设备")
+            .setMessage("是否连接到设备：${device.name ?: "未知设备"}?")
+            .setPositiveButton("连接") { _, _ ->
+                // TODO: 实现连接逻辑
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 1001
     }
 
     override fun onDestroyView() {
