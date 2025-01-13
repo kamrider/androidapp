@@ -21,6 +21,7 @@ import android.widget.Toast
 import android.Manifest
 import android.bluetooth.BluetoothDevice
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.example.okok.HealthMonitorApplication
 
 class HomeFragment : Fragment() {
 
@@ -36,10 +37,11 @@ class HomeFragment : Fragment() {
     private lateinit var bluetoothManager: BluetoothManager
     private var selectedDevice: BluetoothDevice? = null
     private lateinit var disconnectButton: MaterialButton
+    private var isFirstConnect = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        bluetoothManager = BluetoothManager(requireContext())
+        bluetoothManager = (requireActivity().application as HealthMonitorApplication).bluetoothManager
     }
 
     override fun onCreateView(
@@ -67,13 +69,27 @@ class HomeFragment : Fragment() {
         
         // 设置RecyclerView
         deviceListRecyclerView.layoutManager = LinearLayoutManager(context)
-        val deviceListAdapter = DeviceListAdapter(emptyList()) { device ->
+        val initialDevices = bluetoothManager.discoveredDevices.value?.map { device ->
+            DeviceListAdapter.BluetoothDeviceItem(
+                device = device,
+                isConnected = device.address == bluetoothManager.connectedDevice.value?.address
+            )
+        } ?: emptyList()
+
+        val deviceListAdapter = DeviceListAdapter(initialDevices) { device ->
             // 处理设备选择
             selectedDevice = device
-            // TODO: 显示连接按钮或直接开始连接
             showConnectDialog(device)
         }
         deviceListRecyclerView.adapter = deviceListAdapter
+
+        // 立即检查连接状态
+        bluetoothManager.connectedDevice.value?.let { connectedDevice ->
+            (deviceListRecyclerView.adapter as? DeviceListAdapter)?.updateDevices(
+                bluetoothManager.discoveredDevices.value ?: emptyList(),
+                connectedDevice
+            )
+        }
         
         refreshButton = binding.refreshButton
         
@@ -105,19 +121,38 @@ class HomeFragment : Fragment() {
         }
 
         bluetoothManager.discoveredDevices.observe(viewLifecycleOwner) { devices ->
-            (deviceListRecyclerView.adapter as? DeviceListAdapter)?.updateDevices(devices)
+            (deviceListRecyclerView.adapter as? DeviceListAdapter)?.updateDevices(
+                devices,
+                bluetoothManager.connectedDevice.value
+            )
             updateDeviceListVisibility(devices.isEmpty())
         }
 
         bluetoothManager.isConnected.observe(viewLifecycleOwner) { isConnected ->
             if (isConnected) {
-                Toast.makeText(context, "设备连接成功", Toast.LENGTH_SHORT).show()
+                if (isFirstConnect) {
+                    Toast.makeText(context, "设备连接成功", Toast.LENGTH_SHORT).show()
+                    isFirstConnect = false
+                }
                 disconnectButton.visibility = View.VISIBLE
                 refreshButton.visibility = View.GONE
+                
+                // 更新设备列表显示，传入已连接设备
+                (deviceListRecyclerView.adapter as? DeviceListAdapter)?.updateDevices(
+                    bluetoothManager.discoveredDevices.value ?: emptyList(),
+                    bluetoothManager.connectedDevice.value
+                )
             } else {
+                isFirstConnect = true  // 断开连接时重置标志
                 Toast.makeText(context, "设备已断开连接", Toast.LENGTH_SHORT).show()
                 disconnectButton.visibility = View.GONE
                 refreshButton.visibility = View.VISIBLE
+                
+                // 更新设备列表显示
+                (deviceListRecyclerView.adapter as? DeviceListAdapter)?.updateDevices(
+                    bluetoothManager.discoveredDevices.value ?: emptyList(),
+                    null
+                )
             }
         }
     }

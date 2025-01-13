@@ -35,6 +35,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textColor="@color/status_text" />
+            android:textColor="#666666" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/connection_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="已连接"
+        android:textColor="#2196F3"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:layout_marginStart="8dp"/>
 </LinearLayout> 

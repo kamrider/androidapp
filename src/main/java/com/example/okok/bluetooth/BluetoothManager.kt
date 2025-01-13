@@ -9,7 +9,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
-class BluetoothManager(private val context: Context) {
+class BluetoothManager private constructor(private val context: Context) {
     private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
     private val bluetoothAdapter = bluetoothManager.adapter
     private var bluetoothLeScanner: BluetoothLeScanner? = null
@@ -26,8 +26,23 @@ class BluetoothManager(private val context: Context) {
     private val _isConnected = MutableLiveData<Boolean>()
     val isConnected: LiveData<Boolean> = _isConnected
 
+    // 添加已连接设备的引用
+    private var _connectedDevice = MutableLiveData<BluetoothDevice?>()
+    val connectedDevice: LiveData<BluetoothDevice?> = _connectedDevice
+
     companion object {
         private const val SCAN_PERIOD = 10000L // 扫描持续时间：10秒
+        
+        @Volatile
+        private var instance: BluetoothManager? = null
+        
+        fun getInstance(context: Context): BluetoothManager {
+            return instance ?: synchronized(this) {
+                instance ?: BluetoothManager(context.applicationContext).also { 
+                    instance = it 
+                }
+            }
+        }
     }
 
     // 扫描回调
@@ -88,10 +103,12 @@ class BluetoothManager(private val context: Context) {
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
                     _isConnected.postValue(true)
+                    _connectedDevice.postValue(gatt?.device)
                     bluetoothGatt?.discoverServices()
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     _isConnected.postValue(false)
+                    _connectedDevice.postValue(null)
                     bluetoothGatt?.close()
                 }
             }
